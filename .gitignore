@@ -216,3 +216,20 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Mathematica autosaves
+*.nb~
+
+# Cache files
+Cache/
+Caches/
+
+# Compiled Mathematica data
+*.mx
+
+# Temporary files
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
