@@ -9,7 +9,10 @@ from scipy.integrate import solve_ivp
 # dy_2/dt = 0.04*y1 - 10^4*y_2*y_3 - 3*10^7*y_2^2
 # dy_3/dt = 3*10^7*y_2^2
 # We also have the following initial conditions: y_1(0) = 1, y_2(0) = 0, y_3(0) = 0
+# eps=0.01
 t_1 = np.logspace(-6, 8, 2000)
+# t1 = 1+eps*np.random.random_sample(t_1.shape)
+# t_1 *=t1
 t0 = [1.0, 0.0, 0.0]
 def f(t, u):
     y1, y2, y3 = u
@@ -58,10 +61,16 @@ def alpha_bdfl3_bdfopt(h, n):
     n = n if n >= 0 else len(h) + n  # normalize negative index
     omega_n = h[n] / h[n-1]
     omega_n1 = h[n+1]/h[n] if n+1<len(h) else omega_n
-    a0 = -((omega_n1**2* (1 + omega_n1) *omega_n**3)/(2 *(1 + omega_n)* (1 + (1 + omega_n1)* omega_n)))
-    a1 = 1/2 *(omega_n1**2/(1 + omega_n1) + omega_n1**2* omega_n + omega_n**2/(1 + omega_n))
-    a2 = -((2 + omega_n1 + (3 + 2* omega_n1 + omega_n1**2)* omega_n + omega_n**2)/(2* (1 + omega_n)))
-    a3 = 1/2* (1 + omega_n1/(1 + omega_n1) + (1 + 2* omega_n)/(1 + omega_n) + (omega_n1* omega_n)/(1 + (1 + omega_n1)* omega_n))
+    a0, a1, a2, a3 = [-1 / 2 * (omega_n ** 3 * omega_n1 * (1 + omega_n1)) /
+                      ((1 + omega_n) * (1 + omega_n * (1 + omega_n1))),
+                      (omega_n ** 2 / (1 + omega_n) + omega_n1 *
+                       (omega_n + (1 + omega_n1) ** (-1))) / 2,
+                      (-1 - omega_n - ((1 + omega_n1) *
+                        (1 + omega_n * (1 + omega_n1))) / ((1 + omega_n) *
+                            omega_n1)) / 2, ((1 + 2 * omega_n) / (1 + omega_n) +
+                                (1 + 2 * omega_n1 + omega_n * (1 + 4 * omega_n1 +
+                                    3 * omega_n1 ** 2)) / (omega_n1 * (1 + omega_n1) *
+                                        (1 + omega_n * (1 + omega_n1)))) / 2]
     return np.array([a0,a1,a2,a3])
 
 def beta_bdfl3_bdfopt(h, n):
