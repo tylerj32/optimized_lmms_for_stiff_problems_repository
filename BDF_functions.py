@@ -23,6 +23,7 @@ def lmm1(t,h,lam):
     for n in range(len(t) - 1):
         x_num1[n + 1] = (x_num1[n] - h*(lam*np.cos(t[n+1])+np.sin(t[n+1])))/(1-h*lam)
     return x_num, x_num1
+# Testing
 
 def LMM_solver(t,h,alpha,beta,t0,f):
     lmm_y = np.zeros_like(t)
