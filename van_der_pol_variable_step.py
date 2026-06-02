@@ -117,7 +117,7 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
         omega_n = h_n / h[-2]
         r_n = np.linalg.norm(result-y_new)/(1+omega_n)
         r_n = max(r_n, 1e-14) # The max prevents division by zero
-    h_new = (tol / r_n) ** (1 / s) * h_n
+    h_new = (tol / r_n) ** (1 / 2) * h_n
     # Controlling the size of the steps
     h_new = min(h_new, omega_max * h_n)
     h_new = max(h_new, omega_min * h_n)
