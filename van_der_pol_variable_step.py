@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from scipy.signal import hilbert
+# from scipy.signal import hilbert
 import scipy.optimize as opt
 import BDF_like_comparison as blc
 from scipy.integrate import solve_ivp
@@ -11,17 +11,17 @@ import robertson_test as rt
 # dy_2/dt = \mu*(1-y_1^2)y2-y1
 # This denotes a self oscillating system that dissipates. It becomes very stiff as \mu = 500
 # We will also use a dynamic system of variable step size LMMs to better solve this problem
-t0 = [2.0, 0.0]
+y0 = [2.0, 0.0]
 # Initial step size
 h1 = .001
 # Step size limits (for now)
-h_min = 1e-8
+h_min = 1e-5
 h_max = 100.0
 omega_max = 1.5
 omega_min = 0.1
 # 2000
-t_final = 850
-# Tolarance
+t_final = 1000
+# Tolerance
 tol = 1e-6
 # Defining the differential equation (and its Jacobian)
 mu = 1000
@@ -124,7 +124,7 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
     h_new = max(h_min, min(h_max, h_new))
     return result,float(h_new)
 def full_lmm_solver(alpha,beta,f,jac):
-    lmm_y = np.array([t0], dtype=float)
+    lmm_y = np.array([y0], dtype=float)
     t = [0.0] # t starts at 0s and 0+h_n seconds
     h=[h1] # BDFL3 and 4 need more than one h_n
     quarter_printed = False
@@ -146,8 +146,8 @@ def full_lmm_solver(alpha,beta,f,jac):
         if (not threequarter_printed) and current_t >= 0.75 * t_final:
             print("The solver is 75% complete...")
             threequarter_printed = True
-        if (not ninety_printed) and current_t >= 0.96 * t_final:
-            print("The solver is 96% complete...")
+        if (not ninety_printed) and current_t >= 0.9 * t_final:
+            print("The solver is 90% complete...")
             ninety_printed = True
     print('Finished! :)')
     return h,t,lmm_y
@@ -163,7 +163,7 @@ h2,t_3,bdflike3 = full_lmm_solver(rt.alpha_bdfl3_bdfopt,rt.beta_bdfl3_bdfopt,f,j
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 sol = [bdf2,bdflike3]
 t=[t_2,t_3]
-ref = solve_ivp(f, [t_2[0], t_2[-1]], t0, method='Radau', jac=jac, rtol=1e-10, atol=1e-12, dense_output=True)
+ref = solve_ivp(f, [t_2[0], t_2[-1]], y0, method='Radau', jac=jac, rtol=1e-10, atol=1e-12, dense_output=True)
 ref_vals = [ref.sol(t_2),ref.sol(t_3)] # interpolated solution at t_2 and t_3
 h_set = [h,h2]
 line1 = blc.line
@@ -173,12 +173,12 @@ method_handles.append(
         Line2D([0], [0], color='black', lw=2, label='Exact solution')
     )
 for i in range(len(sol)):
-    y1 = sol[i][:,0]
+    y_1 = sol[i][:,0]
     label = 'BDF2' if i==0 else f'BDFL${i+2}_2$'
     method_handles.append(
         Line2D([0], [0], color=default_colors[i+1], lw=2, label=label,linestyle=line1[i])
     )
-    plt.plot(t[i], y1, color=default_colors[i+1], label=label, linestyle=line1[i])
+    plt.plot(t[i], y_1, color=default_colors[i+1], label=label, linestyle=line1[i])
 legend1 = plt.legend(handles=method_handles, title="Method",loc='lower left')
 plt.xlabel('t')
 plt.ylabel(r'$y_2$',rotation=0)
@@ -201,9 +201,9 @@ plt.show()
 #     phase_diff_sol = np.abs(phase_sol - phase_exact)
 #     phase_diff_set.append(phase_diff_sol)
 for i in range(len(sol)):
-    y1 = sol[i][:, 0]
+    y_1 = sol[i][:, 0]
     label = 'BDF2' if i == 0 else f'BDFL${i+2}_2$'
-    plt.semilogy(t[i], np.abs(y1-ref_vals[i][0]), color=default_colors[i+1],linestyle = line1[i],label = label)
+    plt.semilogy(t[i], np.abs(y_1-ref_vals[i][0]), color=default_colors[i+1],linestyle = line1[i],label = label)
 plt.ylabel(r'$|\text{Error}|$')
 plt.xlabel('t')
 plt.legend()
