@@ -15,14 +15,14 @@ y0 = [2.0, 0.0]
 # Initial step size
 h1 = .001
 # Step size limits (for now)
-h_min = 1e-5
+h_min = 1e-8
 h_max = 100.0
 omega_max = 1.5
 omega_min = 0.1
 # 2000
 t_final = 1000
 # Tolerance
-tol = 1e-6
+tol = 1e-4
 # Defining the differential equation (and its Jacobian)
 mu = 1000
 def f(t, u):
@@ -53,7 +53,7 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
     jac_ie = lambda y: np.eye(m) - h_n * jac(t_new, y)
     y_new = opt.fsolve(ie_residual, lmm_y[-1], fprime=jac_ie)
     # For the first k-1 steps we use TR-BDF2
-    if len(t)<s:
+    if len(t)<=s:
         # Jacobian functions for TR-BDF2
         def make_stage_jacobian(scale, t):
             def J(u):
