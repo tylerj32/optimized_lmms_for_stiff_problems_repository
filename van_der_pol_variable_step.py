@@ -15,7 +15,7 @@ y0 = [2.0, 0.0]
 # Initial step size
 h1 = .001
 # Step size limits (for now)
-h_min = 1e-8
+h_min = 1e-5
 h_max = 100.0
 omega_max = 1.5
 omega_min = 0.1
@@ -155,7 +155,7 @@ def full_lmm_solver(alpha,beta,f,jac):
 print('Starting BDF2')
 h,t_2,bdf2 = full_lmm_solver(rt.alpha_bdf2,rt.beta_bdf2,f,jac)
 print('Starting BDFL3_2')
-h2,t_3,bdflike3 = full_lmm_solver(rt.alpha_bdfl3_bdfopt,rt.beta_bdfl3_bdfopt,f,jac)
+h2,t_3,bdflike3 = full_lmm_solver(rt.alpha_bdfl3_poly,rt.beta_bdfl3_poly,f,jac)
 # print('Starting BDFL4')
 # bdflike4 = full_lmm_solver(rt.alpha_bdfl4,rt.beta_bdfl4,f,jac)
 # print('Starting BDFL5')
