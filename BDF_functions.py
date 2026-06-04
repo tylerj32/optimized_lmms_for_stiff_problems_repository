@@ -151,8 +151,8 @@ def LMM_solver2(t,alpha,beta,t0,f,jac):
 
         result, info, ier, mesg = opt.fsolve(lmm, guess, fprime=jac_lmm, full_output=True)
         residual = np.linalg.norm(info['fvec'])
-        if ier != 1 and residual > 1e-10:
-            print(f"fsolve failed at t={t[n + s]:.4f}: ier={ier}, |fvec|={residual:.2e}, msg={mesg}")
-        print(f'Finished loop {n + 1} of {len(t) - s}')
+        # if ier != 1 and residual > 1e-10:
+        #     print(f"fsolve failed at t={t[n + s]:.4f}: ier={ier}, |fvec|={residual:.2e}, msg={mesg}")
+        # print(f'Finished loop {n + 1} of {len(t) - s}')
         lmm_y[n + s] = result
     return lmm_y
