@@ -46,18 +46,22 @@ def alpha_bdf3(h, n):
     return np.array([a0,a1,a2,a3])
 def beta_bdf3(h, n):
     return np.array([0,0,0,1])
-beta_3 = 3/5
+# beta_3 = 3/5
 def alpha_bdfl3(h, n):
     omega_n = h[n] / h[n-1]
-    a0 = -((omega_n**2 *(-beta_3 + (1 - 2 *beta_3)* omega_n + omega_n**2))/(1 + omega_n))
-    a1 = -beta_3 - (-1 + beta_3)* omega_n + (1 - 2 *beta_3)* omega_n**2 + omega_n**3
-    a2 = 1/(1 + omega_n)* (-1 + beta_3 + 2 *(-1 + beta_3) *omega_n + 2* (-1 + beta_3) *omega_n**2 - omega_n**3)
+    omega_n1 = h[n - 1] / h[n - 2] if n + 1 < len(h) else omega_n
+    a0, a1, a2, a3 = [(omega_n ** 2 * (-1 - 2 * omega_n1 + 2 * omega_n1 ** 2)) / (2 + 4 * omega_n * (1 + omega_n1)),
+                        (1 + 2 * omega_n * (1 + omega_n1) + omega_n ** 2 * (1 + 2 * omega_n1 - 2 * omega_n1 ** 2))
+                            / (2 + 4 * omega_n * (1 + omega_n1)), -3 / 2, 1]
     return np.array([a0,a1,a2,1])
 
 def beta_bdfl3(h, n):
+    omega_n = h[n] / h[n - 1]
+    omega_n1 = h[n - 1] / h[n - 2] if n + 1 < len(h) else omega_n
+    beta_3 = (-1 + 2 * omega_n1 + omega_n * (-1 + 4 * omega_n1 + 2 * omega_n1 ** 2)) / (2 + 4 * omega_n * (1 + omega_n1))
     return np.array([0,0,0,beta_3])
 
-def alpha_bdfl3_bdfopt(h, n):
+def alpha_bdfl3_poly(h, n):
     n = n if n >= 0 else len(h) + n  # normalize negative index
     omega_n = h[n-2] / h[n-3]
     omega_n1 = h[n-1]/h[n-2] if n+1<len(h) else omega_n
@@ -66,12 +70,25 @@ def alpha_bdfl3_bdfopt(h, n):
                         / (2 + 4 * omega_n * (1 + omega_n1)), -3 / 2, 1]
     return np.array([a0,a1,a2,a3])
 
-def beta_bdfl3_bdfopt(h, n):
+def beta_bdfl3_poly(h, n):
     omega_n = h[n-2] / h[n - 3]
     omega_n1 = h[n - 1] / h[n-2] if n + 1 < len(h) else omega_n
     b3 = (-1 + 2 * omega_n1 + omega_n * (-1 + 4 * omega_n1 + 2 * omega_n1 ** 2)) / (2 * omega_n1 * (1 + 2 * omega_n * (1 + omega_n1)))
     return np.array([0,0,0,b3])
 
+def alpha_bdfl3_bdfopt(h, n):
+    n = n if n >= 0 else len(h) + n  # normalize negative index
+    omega_n = h[n-2] / h[n-3]
+    omega_n1 = h[n-1]/h[n-2] if n+1<len(h) else omega_n
+    a0, a1, a2, a3 = [-omega_n**3*omega_n1**2*(omega_n1+1)/(2*(omega_n+1)*(omega_n*(omega_n1+1)+1)),
+                      0.5*(omega_n**2/(omega_n+1) + omega_n1**2*omega_n + omega_n1**2/(omega_n1+1)),
+                      -(omega_n**2 + (omega_n1**2 + 2*omega_n1 + 3)*omega_n + omega_n1 + 2)/(2*(omega_n+1)),
+                      0.5*((2*omega_n+1)/(omega_n+1) + omega_n1/(omega_n1+1)+ omega_n*omega_n1/(omega_n*(omega_n1
+                                +1)+1)+ 1)]
+    return np.array([a0,a1,a2,a3])
+
+def beta_bdfl3_bdfopt(h, n):
+    return np.array([0,0,0,1])
 
 def alpha_bdfl4(h, n):
     omega_n = h[n] / h[n-1]
