@@ -47,154 +47,95 @@ def alpha_bdf3(h, n):
 def beta_bdf3(h, n):
     return np.array([0,0,0,1])
 # beta_3 = 3/5
-def alpha_bdfl3(h, n):
-    omega_n = h[n] / h[n-1]
-    omega_n1 = h[n - 1] / h[n - 2] if n + 1 < len(h) else omega_n
-    a0, a1, a2, a3 = [(omega_n ** 2 * (-1 - 2 * omega_n1 + 2 * omega_n1 ** 2)) / (2 + 4 * omega_n * (1 + omega_n1)),
-                        (1 + 2 * omega_n * (1 + omega_n1) + omega_n ** 2 * (1 + 2 * omega_n1 - 2 * omega_n1 ** 2))
-                            / (2 + 4 * omega_n * (1 + omega_n1)), -3 / 2, 1]
-    return np.array([a0,a1,a2,1])
-
-def beta_bdfl3(h, n):
-    omega_n = h[n] / h[n - 1]
-    omega_n1 = h[n - 1] / h[n - 2] if n + 1 < len(h) else omega_n
-    beta_3 = (-1 + 2 * omega_n1 + omega_n * (-1 + 4 * omega_n1 + 2 * omega_n1 ** 2)) / (2 + 4 * omega_n * (1 + omega_n1))
-    return np.array([0,0,0,beta_3])
+# def alpha_bdfl3(h, n):
+#     omega_n = h[n] / h[n-1]
+#     omega_n1 = h[n - 1] / h[n - 2] if n + 1 < len(h) else omega_n
+#     a0, a1, a2, a3 = [(omega_n ** 2 * (-1 - 2 * omega_n1 + 2 * omega_n1 ** 2)) / (2 + 4 * omega_n * (1 + omega_n1)),
+#                         (1 + 2 * omega_n * (1 + omega_n1) + omega_n ** 2 * (1 + 2 * omega_n1 - 2 * omega_n1 ** 2))
+#                             / (2 + 4 * omega_n * (1 + omega_n1)), -3 / 2, 1]
+#     return np.array([a0,a1,a2,1])
+#
+# def beta_bdfl3(h, n):
+#     omega_n = h[n] / h[n - 1]
+#     omega_n1 = h[n - 1] / h[n - 2] if n + 1 < len(h) else omega_n
+#     beta_3 = (-1 + 2 * omega_n1 + omega_n * (-1 + 4 * omega_n1 + 2 * omega_n1 ** 2)) / (2 + 4 * omega_n * (1 + omega_n1))
+#     return np.array([0,0,0,beta_3])
 
 def alpha_bdfl3_poly(h, n):
-    n = n if n >= 0 else len(h) + n  # normalize negative index
-    omega_n = h[n-1] / h[n-2]
-    omega_n1 = h[n]/h[n-1] if n+1<len(h) else omega_n
-    a0, a1, a2, a3 = [(omega_n ** 2 * (-1 - 2 * omega_n1 + 2 * omega_n1 ** 2)) / (2 + 4 * omega_n * (1 + omega_n1)),
-                      (1 + 2 * omega_n * (1 + omega_n1) + omega_n ** 2 * (1 + 2 * omega_n1 - 2 * omega_n1 ** 2))
-                        / (2 + 4 * omega_n * (1 + omega_n1)), -3 / 2, 1]
+    omega_n = h[n] / h[n-1]
+    omega_n1 = h[n-1]/h[n-2] if n+2<len(h) else omega_n
+    a0, a1, a2, a3 = [((-1 - 2 * omega_n + 2 * omega_n ** 2) * omega_n1 ** 2) / (2 + 4 * (1 + omega_n) * omega_n1),
+                      (1 + 2 * (1 + omega_n) * omega_n1 + (1 + 2 * omega_n - 2 * omega_n ** 2) * omega_n1 ** 2) / (2 + 4
+                        * (1 + omega_n) * omega_n1), -3 / 2, 1]
     return np.array([a0,a1,a2,a3])
 
 def beta_bdfl3_poly(h, n):
-    omega_n = h[n-1] / h[n - 2]
-    omega_n1 = h[n] / h[n-1] if n + 1 < len(h) else omega_n
-    b3 = (-1 + 2 * omega_n1 + omega_n * (-1 + 4 * omega_n1 + 2 * omega_n1 ** 2)) / (2 * omega_n1 * (1 + 2 * omega_n * (1 + omega_n1)))
+    omega_n = h[n] / h[n - 1]
+    omega_n1 = h[n-1] / h[n-2] if n + 1 < len(h) else omega_n
+    b3 = (-1 + 2 * omega_n + (-1 + 4 * omega_n + 2 * omega_n ** 2) * omega_n1) / (2 * omega_n * (1 + 2 * (1 + omega_n)
+            * omega_n1))
     return np.array([0,0,0,b3])
-
-def alpha_bdfl3_bdfopt(h, n):
-    n = n if n >= 0 else len(h) + n  # normalize negative index
-    omega_n = h[n-2] / h[n-3]
-    omega_n1 = h[n-1]/h[n-2] if n+1<len(h) else omega_n
-    a0, a1, a2, a3 = [-omega_n**3*omega_n1**2*(omega_n1+1)/(2*(omega_n+1)*(omega_n*(omega_n1+1)+1)),
-                      0.5*(omega_n**2/(omega_n+1) + omega_n1**2*omega_n + omega_n1**2/(omega_n1+1)),
-                      -(omega_n**2 + (omega_n1**2 + 2*omega_n1 + 3)*omega_n + omega_n1 + 2)/(2*(omega_n+1)),
-                      0.5*((2*omega_n+1)/(omega_n+1) + omega_n1/(omega_n1+1)+ omega_n*omega_n1/(omega_n*(omega_n1
-                                +1)+1)+ 1)]
-    return np.array([a0,a1,a2,a3])
-
-def beta_bdfl3_bdfopt(h, n):
-    return np.array([0,0,0,1])
 
 def alpha_bdfl4(h, n):
     omega_n = h[n] / h[n-1]
-    omega_n1 = h[n+1]/h[n] if n+1<len(h) else omega_n
-    omega_n2 = h[n + 2] / h[n + 1] if n + 2 < len(h) else omega_n1
-    a0 = (((1 - 1/np.sqrt(2)) *omega_n**4 *omega_n1**3* omega_n2**2* (1 + omega_n2)* (1 + omega_n1* (1 + omega_n2)))
-          /((1 + omega_n)* (1 + omega_n* (1 + omega_n1))* (1 + omega_n* (1 + omega_n1* (1 + omega_n2)))))
-    a1 = -(((-(5/2) + 2*np.sqrt(2)) *omega_n**3* omega_n1**2* (1 + omega_n1))/((1 + omega_n)* (1 + omega_n
-            * (1 + omega_n1)))) + ((-2 + np.sqrt(2))* omega_n1**3* omega_n2**2* (1 + omega_n2) *(1 + omega_n
-                    * (1 + omega_n1* (1 + omega_n2))))/(2* (1 + omega_n1)* (1 + omega_n1* (1 + omega_n2)))
-    a2 = ((5/2 - 3/np.sqrt(2))* omega_n**2)/(1 + omega_n) + (-(5/2) + 2 *np.sqrt(2))* omega_n1**2 *(omega_n + 1/(1
-            + omega_n1)) - ((-2 + np.sqrt(2))* omega_n2**2* (1 + omega_n1* (1 + omega_n2)) *(1 + omega_n* (1 + omega_n1
-                    * (1 + omega_n2))))/(2 *(1 + omega_n)* (1 + omega_n2))
-    a3 = 1/2 *((-5 + 3 *np.sqrt(2))* (1 + omega_n) - ((-5 + 4 *np.sqrt(2))* (1 + omega_n1)* (1 + omega_n* (1
-            + omega_n1)))/(1 + omega_n) + ((-2 + np.sqrt(2))* (1 + omega_n2) *(1 + omega_n1* (1 + omega_n2)) *(1
-                    + omega_n* (1 + omega_n1 *(1 + omega_n2))))/((1 + omega_n1)* (1 + omega_n* (1 + omega_n1))))
-    a4 = ((5/2 - 3/np.sqrt(2)) *(1 + 2 *omega_n))/(1 + omega_n) + (-(5/2) + 2 *np.sqrt(2))* (1 + omega_n1* (1/(1
-            + omega_n1) + omega_n/(1 + omega_n *(1 + omega_n1)))) + (1 - 1/np.sqrt(2))* (1 + omega_n2* (1/(1 + omega_n2)
-                    + omega_n1* (1/(1 + omega_n1* (1 + omega_n2)) + omega_n/(1 + omega_n* (1 + omega_n1 *(1
-                            + omega_n2))))))
+    omega_n1 = h[n-1]/h[n-2] if n+2<len(h) else omega_n
+    omega_n2 = h[n - 2] / h[n - 3] if n + 3 < len(h) else omega_n1
+    a0,a1,a2,a3,a4 = [((7 + 2 * np.sqrt(2) + 2 * (7 + 2*np.sqrt(2)) * (1 + omega_n) * omega_n1 + (5 - 22 * np.sqrt(2) + omega_n 
+        * (10 - 44 * np.sqrt(2) + 41 * omega_n)) * omega_n1 ** 2) *omega_n2 ** 2) / (41 + 82 * (1 + (1 + omega_n) * omega_n1)
+            * omega_n2), (-7 - 2 * np.sqrt(2) + omega_n2 * ((-5 + 22 * np.sqrt(2) + (-10 + 44 * np.sqrt(2) - 41 * omega_n) 
+                * omega_n) * omega_n1 ** 2 * omega_n2 - 2 * (7 + 2*np.sqrt(2)) * (1 + omega_n) * omega_n1 * (1 + omega_n2)
+                    - (7 + 2 * np.sqrt(2)) * (2 + omega_n2))) / (41 + 82 * (1 + (1 + omega_n) * omega_n1) * omega_n2), 
+                      (2 * (1 + 12 * np.sqrt(2))) / 41, (-2 * (18 + 11 * np.sqrt(2))) / 41, 1]
     return np.array([a0,a1,a2,a3,a4])
 
 def beta_bdfl4(h, n):
-    return np.array([0,0,0,0,1])
+    omega_n = h[n] / h[n - 1]
+    omega_n1 = h[n - 1] / h[n - 2] if n + 2 < len(h) else omega_n
+    omega_n2 = h[n - 2] / h[n - 3] if n + 3 < len(h) else omega_n1
+    b4 = ((5 - 22 * np.sqrt(2) + 41 * omega_n * (2 + omega_n)) * omega_n1 ** 2 * omega_n2 + (7 + 2 * np.sqrt(2))
+          * (1 + omega_n2) - (-5 + 22 * np.sqrt(2) - 41 * omega_n) * omega_n1 * (1 + 2 * omega_n2)) / (41 * omega_n
+            * omega_n1 * (1 + 2 * (1 + (1 + omega_n) * omega_n1) * omega_n2))
+    return np.array([0,0,0,0,b4])
 
 sqrt5 = np.sqrt(5)
 def alpha_bdfl5(h, n):
     omega_n = h[n] / h[n-1]
-    omega_n1 = h[n+1]/h[n] if n+1<len(h) else omega_n
-    omega_n2 = h[n + 2] / h[n + 1] if n + 2 < len(h) else omega_n1
-    omega_n3 = h[n + 3] / h[n + 2] if n + 3 < len(h) else omega_n2
+    omega_n1 = h[n-1]/h[n-2] if n+2<len(h) else omega_n
+    omega_n2 = h[n - 2] / h[n - 3] if n + 3 < len(h) else omega_n1
+    omega_n3 = h[n - 3] / h[n - 4] if n + 4 < len(h) else omega_n2
     print('omega_n =', omega_n) if n == 1995 else None
-    a0, a1, a2, a3, a4, a5 = [
-        ((-3 + np.sqrt(5)) * omega_n ** 5 * omega_n1 ** 4 * omega_n2 ** 3 * omega_n3 ** 2 * (1 + omega_n3) * (
-                    1 + omega_n2 * (1 + omega_n3)) *
-         (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3)))) / (
-                    4 * (1 + omega_n) * (1 + omega_n * (1 + omega_n1)) *
-                    (1 + omega_n * (1 + omega_n1 * (1 + omega_n2))) * (
-                                1 + omega_n * (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))))),
-        (omega_n1 ** 3 * omega_n2 ** 2 * (((-35 + 17 * np.sqrt(5)) * omega_n ** 4 * (1 + omega_n2) * (
-                    1 + omega_n1 * (1 + omega_n2)) ** 2) /
-                                              ((1 + omega_n) * (1 + omega_n * (1 + omega_n1)) * (
-                                                        1 + omega_n * (1 + omega_n1 * (1 + omega_n2)))) -
-                                              (5 * (-3 + np.sqrt(5)) * omega_n1 * omega_n2 * omega_n3 ** 2 * (
-                                                        1 + omega_n3) * (1 + omega_n2 * (1 + omega_n3)) *
-                                               (1 + omega_n * (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))))) /
-                                              ((1 + omega_n1) * (
-                                                        1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3)))))) / (
-                    20 * (1 + omega_n1 * (1 + omega_n2))),
-        ((2 * (-10 + 3 * np.sqrt(5)) * omega_n ** 3 * omega_n1 ** 2 * (1 + omega_n1)) / (
-                    (1 + omega_n) * (1 + omega_n * (1 + omega_n1))) -
-         ((-35 + 17 * np.sqrt(5)) * omega_n1 ** 3 * omega_n2 ** 2 * (1 + omega_n2) * (
-                     1 + omega_n * (1 + omega_n1 * (1 + omega_n2)))) /
-         ((1 + omega_n1) * (1 + omega_n1 * (1 + omega_n2))) + (
-                     5 * (-3 + np.sqrt(5)) * omega_n2 ** 3 * omega_n3 ** 2 * (1 + omega_n3) *
-                     (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))) * (
-                                 1 + omega_n * (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))))) /
-         ((1 + omega_n) * (1 + omega_n2) * (1 + omega_n2 * (1 + omega_n3)))) / 20,
-        ((-2 * (-10 + 3 * np.sqrt(5)) * omega_n ** 2) / (1 + omega_n) + 2 * (10 - 3 * np.sqrt(5)) * omega_n1 ** 2 * (
-                    omega_n + (1 + omega_n1) ** (-1)) +
-         ((-35 + 17 * np.sqrt(5)) * omega_n2 ** 2 * (1 + omega_n1 * (1 + omega_n2)) * (
-                     1 + omega_n * (1 + omega_n1 * (1 + omega_n2)))) /
-         ((1 + omega_n) * (1 + omega_n2)) - (
-                     5 * (-3 + np.sqrt(5)) * omega_n3 ** 2 * (1 + omega_n2 * (1 + omega_n3)) *
-                     (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))) * (
-                                 1 + omega_n * (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))))) /
-         ((1 + omega_n1) * (1 + omega_n * (1 + omega_n1)) * (1 + omega_n3))) / 20,
-        (2 * (-10 + 3 * np.sqrt(5)) * (1 + omega_n) + (
-                    2 * (-10 + 3 * np.sqrt(5)) * (1 + omega_n1) * (1 + omega_n * (1 + omega_n1))) / (1 + omega_n) -
-         ((-35 + 17 * np.sqrt(5)) * (1 + omega_n2) * (1 + omega_n1 * (1 + omega_n2)) * (
-                     1 + omega_n * (1 + omega_n1 * (1 + omega_n2)))) /
-         ((1 + omega_n1) * (1 + omega_n * (1 + omega_n1))) + (
-                     5 * (-3 + np.sqrt(5)) * (1 + omega_n3) * (1 + omega_n2 * (1 + omega_n3)) *
-                     (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))) * (
-                                 1 + omega_n * (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))))) /
-         ((1 + omega_n2) * (1 + omega_n1 * (1 + omega_n2)) * (
-                     1 + omega_n * (1 + omega_n1 * (1 + omega_n2))))) / 20,
-        ((-2 * (-10 + 3 * np.sqrt(5)) * (1 + 2 * omega_n)) / (1 + omega_n) +
-         2 * (10 - 3 * np.sqrt(5)) * (
-                     1 + omega_n1 * ((1 + omega_n1) ** (-1) + omega_n / (1 + omega_n * (1 + omega_n1)))) +
-         (-35 + 17 * np.sqrt(5)) * (1 + omega_n2 * (
-                            (1 + omega_n2) ** (-1) + omega_n1 * ((1 + omega_n1 * (1 + omega_n2)) ** (-1) +
-                                                                    omega_n / (1 + omega_n * (
-                                        1 + omega_n1 * (1 + omega_n2)))))) + 5 * (3 - np.sqrt(5)) * omega_n1 * (
-             omega_n2) * omega_n3 *
-         ((1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))) ** (-1) + (
-                     1 + 2 * omega_n3 + omega_n2 * (1 + 4 * omega_n3 + 3 * omega_n3 ** 2) +
-                     omega_n * (1 + 2 * omega_n3 + omega_n2 * (1 + 4 * omega_n3 + 3 * omega_n3 ** 2) +
-                                  omega_n1 * (1 + 2 * omega_n3 + omega_n2 ** 2 * (1 + omega_n3) ** 2 * (
-                                 1 + 4 * omega_n3) + omega_n2 * (2 + 8 * omega_n3 + 6 * omega_n3 ** 2)))) /
-          (omega_n1 * omega_n2 * omega_n3 * (1 + omega_n3) * (1 + omega_n2 * (1 + omega_n3)) *
-           (1 + omega_n * (1 + omega_n1 * (1 + omega_n2 * (1 + omega_n3))))))) / 20
-    ]
+    a0, a1, a2, a3, a4, a5 = [-1/88*((27 - 7*np.sqrt(5) - 2*(-27 + 7*np.sqrt(5))*(1 + (1 + omega_n)*omega_n1)*omega_n2
+                                + 2*(1 - 8*np.sqrt(5) + (2 - 16*np.sqrt(5))*(1 + omega_n)*omega_n1 + (1 + 14*np.sqrt(5)
+                                    + 2*(1 + 14*np.sqrt(5) - 22*omega_n)*omega_n)*omega_n1**2)*omega_n2**2)*omega_n3**2)
+                                        /(1 + 2*(1 + (1 + (1 + omega_n)*omega_n1)*omega_n2)*omega_n3),
+                              (27 - 7*np.sqrt(5) + omega_n3*(2*(1 - 8*np.sqrt(5) + (2 - 16*np.sqrt(5))*(1 + omega_n)
+                                    *omega_n1 + (1 + 14*np.sqrt(5) + 2*(1 + 14*np.sqrt(5) - 22*omega_n)*omega_n)
+                                        *omega_n1**2)*omega_n2**2*omega_n3 - 2*(-27 + 7*np.sqrt(5))*(1 + (1 + omega_n)
+                                            *omega_n1)*omega_n2*(1 + omega_n3) - (-27 + 7*np.sqrt(5))*(2 + omega_n3)))/
+                                                (88*(1 + 2*(1 + (1 + (1 + omega_n)*omega_n1)*omega_n2)*omega_n3)),
+                              (-25 - 9*np.sqrt(5))/88, np.sqrt(5)/2, (-45 - 14*np.sqrt(5))/44, 1]
     return np.array([a0,a1,a2,a3,a4,a5])
 
 def beta_bdfl5(h, n):
-    return np.array([0,0,0,0,0,1])
+    omega_n = h[n] / h[n - 1]
+    omega_n1 = h[n - 1] / h[n - 2] if n + 2 < len(h) else omega_n
+    omega_n2 = h[n - 2] / h[n - 3] if n + 3 < len(h) else omega_n1
+    omega_n3 = h[n - 3] / h[n - 4] if n + 4 < len(h) else omega_n2
+    b5 = -1 / 88 * (27 - 7 * np.sqrt(5) + (2 - 16 * np.sqrt(5)) * omega_n2 + 2 * (1 + 14 * np.sqrt(5) - 44 * omega_n
+            * (2 + omega_n)) * omega_n1 ** 2 * omega_n2 ** 2 * omega_n3 + (27 - 7 * np.sqrt(5) + (2 - 16 * np.sqrt(5))
+                * omega_n2 * (2 + omega_n2)) * (omega_n3) + 2 * (1 + 14 * np.sqrt(5) - 44 * omega_n) * omega_n1
+                    * omega_n2 * (1 + 2 * (1 + omega_n2) * omega_n3)) /(omega_n * omega_n1 * omega_n2 * (1 + 2 * (1
+                        + (1 + (1 + omega_n) * omega_n1) * omega_n2) * omega_n3))
+    return np.array([0,0,0,0,0,b5])
 if __name__ == "__main__":
     bdf2 = bf.LMM_solver2(t_1, alpha_bdf2, beta_bdf2, t0, f, jac)
     bdf3 = bf.LMM_solver2(t_1, alpha_bdf3, beta_bdf3, t0, f, jac)
-    bdfl3 = bf.LMM_solver2(t_1, alpha_bdfl3_bdfopt, beta_bdfl3_bdfopt, t0, f, jac)
+    bdfl3 = bf.LMM_solver2(t_1, alpha_bdfl3_poly, beta_bdfl3_poly, t0, f, jac)
     # bdfl3err = bf.LMM_solver2(t_1,alpha_bdfl3_errcons,beta_bdfl3_errcons,t0, f, jac)
     bdfl4 = bf.LMM_solver2(t_1,alpha_bdfl4,beta_bdfl4,t0, f, jac)
     bdfl5 = bf.LMM_solver2(t_1,alpha_bdfl5,beta_bdfl5,t0, f, jac)
     # True solution
-    ref = solve_ivp(f, [t_1[0], t_1[-1]], t0, method='Radau', jac=jac, rtol=2.220446049250313e-14, atol=1e-20, dense_output=True)
+    ref = solve_ivp(f, [t_1[0], t_1[-1]], t0, method='Radau', jac=jac, rtol=2.22045e-14, atol=1e-20, dense_output=True)
     ref_vals = ref.sol(t_1[:-1])  # interpolated solution at t_1
     print('Max value of y2 for BDFL5: ',np.max(bdfl5[:,1]))
     sol = np.array([bdf2,bdf3,bdfl3,bdfl4,bdfl5])

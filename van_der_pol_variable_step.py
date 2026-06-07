@@ -20,11 +20,11 @@ h_max = 100.0
 omega_max = 1.5
 omega_min = 0.1
 # 2000
-t_final = 1000
+t_final = 2000
 # Tolerance
 tol = 1e-4
 # Defining the differential equation (and its Jacobian)
-mu = 1000
+mu = 500
 def f(t, u):
     y1, y2 = u
     return np.array([
@@ -41,7 +41,7 @@ def jac(t, u):
 def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
     m = 2  # dimension of t0: 2
     # Determine s safely using a dummy h array with enough elements
-    _h_dummy = [h[-1]] * 3
+    _h_dummy = [h[-1],0.002] * 3
     s = len(alpha(_h_dummy, -1)) - 1
     h_n = h[-1]
     t_new = t[-1] + h_n
@@ -53,7 +53,7 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
     jac_ie = lambda y: np.eye(m) - h_n * jac(t_new, y)
     y_new = opt.fsolve(ie_residual, lmm_y[-1], fprime=jac_ie)
     # For the first k-1 steps we use TR-BDF2
-    if len(t)<=s:
+    if len(t)<s:
         # Jacobian functions for TR-BDF2
         def make_stage_jacobian(scale, t):
             def J(u):
@@ -114,8 +114,8 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
         if ier != 1 and residual > 1e-10:
             print(f"fsolve failed at t={t[-1]:.4f}: ier={ier}, |fvec|={residual:.2e}, msg={mesg}")
         # Scale by (1 + omega) to account for variable
-        omega_n = h_n / h[-2]
-        r_n = np.linalg.norm(result-y_new)/(1+omega_n)
+        # omega_n = h_n / h[-2]
+        r_n = np.linalg.norm(result-y_new)#/(1+omega_n)
         r_n = max(r_n, 1e-14) # The max prevents division by zero
     h_new = (tol / r_n) ** (1 / 2) * h_n
     # Controlling the size of the steps
@@ -130,7 +130,6 @@ def full_lmm_solver(alpha,beta,f,jac):
     quarter_printed = False
     half_printed = False
     threequarter_printed = False
-    ninety_printed = False
     while t[-1]<=t_final:
         lmm_y_new,h_new = LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac)
         lmm_y = np.append(lmm_y, [lmm_y_new], axis=0)
@@ -146,26 +145,27 @@ def full_lmm_solver(alpha,beta,f,jac):
         if (not threequarter_printed) and current_t >= 0.75 * t_final:
             print("The solver is 75% complete...")
             threequarter_printed = True
-        if (not ninety_printed) and current_t >= 0.9 * t_final:
-            print("The solver is 90% complete...")
-            ninety_printed = True
     print('Finished! :)')
     return h,t,lmm_y
 # BDFL methods
 print('Starting BDF2')
-h,t_2,bdf2 = full_lmm_solver(rt.alpha_bdf2,rt.beta_bdf2,f,jac)
+h2,t_2,bdf2 = full_lmm_solver(rt.alpha_bdf2,rt.beta_bdf2,f,jac)
 print('Starting BDFL3_2')
-h2,t_3,bdflike3 = full_lmm_solver(rt.alpha_bdfl3_poly,rt.beta_bdfl3_poly,f,jac)
-# print('Starting BDFL4')
-# bdflike4 = full_lmm_solver(rt.alpha_bdfl4,rt.beta_bdfl4,f,jac)
-# print('Starting BDFL5')
-# bdflike5 = full_lmm_solver(rt.alpha_bdfl5,rt.beta_bdfl5,f,jac)
+h3,t_3,bdflike3 = full_lmm_solver(rt.alpha_bdfl3_poly,rt.beta_bdfl3_poly,f,jac)
+print('Starting BDFL4_2')
+h4,t_4,bdflike4 = full_lmm_solver(rt.alpha_bdfl4,rt.beta_bdfl4,f,jac)
+print('Starting BDFL5_2')
+h5,t_5,bdflike5 = full_lmm_solver(rt.alpha_bdfl5,rt.beta_bdfl5,f,jac)
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-sol = [bdf2,bdflike3]
-t=[t_2,t_3]
+sol = [bdf2,bdflike3,bdflike4,bdflike5]
+t=[t_2,t_3,t_4,t_5]
+h_set = [h2,h3,h4,h5]
 ref = solve_ivp(f, [t_2[0], t_2[-1]], y0, method='Radau', jac=jac, rtol=1e-10, atol=1e-12, dense_output=True)
-ref_vals = [ref.sol(t_2),ref.sol(t_3)] # interpolated solution at t_2 and t_3
-h_set = [h,h2]
+ref_vals = [] # interpolated solution at t
+for i in t:
+    ref_vals.append(ref.sol(i))
+plt.ion()
+plt.figure()
 line1 = blc.line
 method_handles = []
 plt.plot(t_2,ref_vals[0][0], color='black', lw=2, label='Exact solution')
@@ -185,7 +185,8 @@ plt.ylabel(r'$y_2$',rotation=0)
 plt.title('Numerical Result - van der Pol')
 plt.tight_layout()
 plt.grid()
-plt.show()
+# plt.show()
+plt.figure()
 # Error plot
 # phase_diff_set = []
 # for i, s in enumerate(sol):
@@ -209,7 +210,8 @@ plt.xlabel('t')
 plt.legend()
 plt.grid()
 plt.tight_layout()
-plt.show()
+# plt.show()
+plt.figure()
 # Step size plot
 for i in range(len(h_set)):
     label = 'BDF2' if i == 0 else f'BDFL${i+2}_2$'
@@ -219,7 +221,8 @@ plt.xlabel(r'$t$')
 plt.title(r'Step size at $t_n$')
 plt.legend()
 plt.grid()
-plt.show()
+# plt.show()
+plt.figure()
 # Step size ratio plot
 for i in range(len(h_set)):
     h_i = h_set[i]
@@ -232,3 +235,12 @@ plt.title(r'Step size ratio ($\omega_n$) at $t_n$')
 plt.legend()
 plt.grid()
 plt.show()
+bdf2err = np.linalg.norm(ref_vals[0][1]-bdf2[:,0])
+bdfl3err = np.linalg.norm(ref_vals[1][1]-bdflike3[:,0])
+bdfl4err = np.linalg.norm(ref_vals[2][1]-bdflike4[:,0])
+bdfl5err = np.linalg.norm(ref_vals[3][1]-bdflike5[:,0])
+print('Norm of the BDF2 error: ',bdf2err)
+print(f'Norm of the BDFL3_2 error: {bdfl3err}')
+print(f'Norm of the BDFL4_2 error: {bdfl4err}')
+print(f'Norm of the BDFL5_2 error: {bdfl5err}')
+plt.pause(1e8)
