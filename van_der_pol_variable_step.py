@@ -15,14 +15,14 @@ y0 = [2.0, 0.0]
 # Initial step size
 h1 = .001
 # Step size limits (for now)
-h_min = 1e-5
+h_min = 1e-8
 h_max = 100.0
 omega_max = 1.5
 omega_min = 0.1
 # 2000
 t_final = 2000
 # Tolerance
-tol = 1e-4
+tol = 1e-6
 # Defining the differential equation (and its Jacobian)
 mu = 500
 def f(t, u):
@@ -235,12 +235,11 @@ plt.title(r'Step size ratio ($\omega_n$) at $t_n$')
 plt.legend()
 plt.grid()
 plt.show()
-bdf2err = np.linalg.norm(ref_vals[0][1]-bdf2[:,0])
-bdfl3err = np.linalg.norm(ref_vals[1][1]-bdflike3[:,0])
-bdfl4err = np.linalg.norm(ref_vals[2][1]-bdflike4[:,0])
-bdfl5err = np.linalg.norm(ref_vals[3][1]-bdflike5[:,0])
-print('Norm of the BDF2 error: ',bdf2err)
-print(f'Norm of the BDFL3_2 error: {bdfl3err}')
-print(f'Norm of the BDFL4_2 error: {bdfl4err}')
-print(f'Norm of the BDFL5_2 error: {bdfl5err}')
+for i in range(len(sol)):
+    y_1 = sol[i][:, 0]
+    error = np.linalg.norm(ref_vals[i][0]-y_1)/len(y_1)
+    if i==0:
+        print(f'Norm of the BDFL2 error: {error}')
+    else:
+        print(f'Norm of the BDFL{i+2}_2 error: {error}')
 plt.pause(1e8)
