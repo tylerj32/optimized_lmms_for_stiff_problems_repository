@@ -11,4 +11,4 @@ python van_der_pol.py
 # Robertson's problem plots
 python robertson_test.py
 # van der Pol (variable step size) plots
-python van_der_pol_variable step
+`python van_der_pol_variable_step.py`
