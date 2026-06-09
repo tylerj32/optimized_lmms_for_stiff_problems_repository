@@ -173,6 +173,7 @@ if __name__ == "__main__":
     plt.xlabel('t')
     plt.ylabel('Concentration')
     plt.title(r'Chemical decay of $y_1 \to y_2 \to y_3$')
+    plt.xlim(t_1[0],t_1[-1])
     plt.tight_layout()
     plt.grid()
     plt.show()
@@ -196,8 +197,9 @@ if __name__ == "__main__":
     axs[1].set_ylabel(r'$|y_2 - y_{2\text{(Exact)}}|$')
     axs[2].set_ylabel(r'$|y_3 - y_{3\text{(Exact)}}|$')
     axs[2].set_xlabel('t')
-
-    # axs[0].set_ylim(1e-13,1e-4)
+    axs[0].set_xlim(t_1[0], t_1[-1])
+    axs[1].set_xlim(t_1[0], t_1[-1])
+    axs[2].set_xlim(t_1[0], t_1[-1])
 
     # Only one legend (usually top plot)
     axs[0].legend(loc='center left', bbox_to_anchor=(1, 0.5))

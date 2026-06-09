@@ -1,10 +1,10 @@
 import numpy as np
 import scipy.optimize as opt
 h1 = 0.1 # tau = time step
-t1 = np.arange(0, 3+h1, h1)
+t1 = np.arange(0, 6+h1, h1)
 lam1 = -10**6
 # n-cos(t0) => 1.5-1
-tan = np.arange(0, 3,.01)
+tan = np.arange(0, 6,.01)
 x_exact = np.exp(lam1*t1)/2 + np.cos(t1) # Exact Solution
 x_exact_comp = np.cos(t1) # Exact Solution
 x_an = np.exp(lam1*tan)/2 + np.cos(tan)
@@ -153,6 +153,6 @@ def LMM_solver2(t,alpha,beta,t0,f,jac):
         residual = np.linalg.norm(info['fvec'])
         # if ier != 1 and residual > 1e-10:
         #     print(f"fsolve failed at t={t[n + s]:.4f}: ier={ier}, |fvec|={residual:.2e}, msg={mesg}")
-        # print(f'Finished loop {n + 1} of {len(t) - s}')
+        print(f'Finished loop {n + 1} of {len(t) - s}')
         lmm_y[n + s] = result
     return lmm_y

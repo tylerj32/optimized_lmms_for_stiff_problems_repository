@@ -9,7 +9,7 @@ import robertson_test as rt
 # In this script, we will attempt to solve a system of ODEs defined below:
 # dy_1/dt = y2
 # dy_2/dt = \mu*(1-y_1^2)y2-y1
-# This denotes a self oscillating system that dissipates. It becomes very stiff as \mu = 500
+# This denotes a self oscillating system. It becomes very stiff when \mu = 500
 # We will also use a dynamic system of variable step size LMMs to better solve this problem
 y0 = [2.0, 0.0]
 # Initial step size
@@ -183,30 +183,19 @@ legend1 = plt.legend(handles=method_handles, title="Method",loc='lower left')
 plt.xlabel('t')
 plt.ylabel(r'$y_2$',rotation=0)
 plt.title('Numerical Result - van der Pol')
+plt.xlim([0,t_2[-1]])
 plt.tight_layout()
 plt.grid()
 # plt.show()
 plt.figure()
 # Error plot
-# phase_diff_set = []
-# for i, s in enumerate(sol):
-#     # Reference solution evaluated on THIS method's grid
-#     ref_vals_i = ref.sol(t[i])
-#     y2_exact = ref_vals_i[1]
-#     analytic_exact = hilbert(y2_exact)
-#     phase_exact = np.unwrap(np.angle(analytic_exact))
-#     # Numerical solution
-#     y2_num = s[:,1]
-#     analytic_sol = hilbert(y2_num)
-#     phase_sol = np.unwrap(np.angle(analytic_sol))
-#     phase_diff_sol = np.abs(phase_sol - phase_exact)
-#     phase_diff_set.append(phase_diff_sol)
 for i in range(len(sol)):
     y_1 = sol[i][:, 0]
     label = 'BDF2' if i == 0 else f'BDFL${i+2}_2$'
     plt.semilogy(t[i], np.abs(y_1-ref_vals[i][0]), color=default_colors[i+1],linestyle = line1[i],label = label)
 plt.ylabel(r'$|\text{Error}|$')
 plt.xlabel('t')
+plt.xlim([0,t_2[-1]])
 plt.legend()
 plt.grid()
 plt.tight_layout()
@@ -215,10 +204,11 @@ plt.figure()
 # Step size plot
 for i in range(len(h_set)):
     label = 'BDF2' if i == 0 else f'BDFL${i+2}_2$'
-    plt.semilogy(t[i], h_set[i], color=default_colors[i+1],linestyle = line1[i],label = label)
+    plt.plot(t[i], h_set[i], color=default_colors[i+1],linestyle = line1[i],label = label)
 plt.ylabel(r'$h_n$',rotation=0)
 plt.xlabel(r'$t$')
 plt.title(r'Step size at $t_n$')
+plt.xlim([0,t_2[-1]])
 plt.legend()
 plt.grid()
 # plt.show()
@@ -228,10 +218,11 @@ for i in range(len(h_set)):
     h_i = h_set[i]
     omega = np.array(h_i[1:]) / np.array(h_i[:-1])
     label = 'BDF2' if i == 0 else f'BDFL${i+2}_2$'
-    plt.semilogy(t[i][1:], omega, color=default_colors[i+1],linestyle = line1[i],label = label)
+    plt.plot(t[i][1:], omega, color=default_colors[i+1],linestyle = line1[i],label = label)
 plt.ylabel(r'$\omega_n$',rotation=0)
 plt.xlabel(r'$t$')
 plt.title(r'Step size ratio ($\omega_n$) at $t_n$')
+plt.xlim([0,t_2[-1]])
 plt.legend()
 plt.grid()
 plt.show()
