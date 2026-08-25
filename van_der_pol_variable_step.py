@@ -15,14 +15,14 @@ y0 = [2.0, 0.0]
 # Initial step size
 h1 = .001
 # Step size limits (for now)
-h_min = 1e-8
+h_min = 1e-5
 h_max = 100.0
 omega_max = 1.5
 omega_min = 0.1
 # 2000
 t_final = 2000
 # Tolerance
-tol = 1e-6
+tol = 1e-3
 # Defining the differential equation (and its Jacobian)
 mu = 500
 def f(t, u):
@@ -38,6 +38,7 @@ def jac(t, u):
         [2*mu*y2*y1-1.0,   mu*(1-y1**2)]
     ])
 # Adding the specialized solver for this method
+r_n_set = []
 def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
     m = 2  # dimension of t0: 2
     # Determine s safely using a dummy h array with enough elements
@@ -117,6 +118,7 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
         # omega_n = h_n / h[-2]
         r_n = np.linalg.norm(result-y_new)#/(1+omega_n)
         r_n = max(r_n, 1e-14) # The max prevents division by zero
+        r_n_set.append((s, t_new, r_n))
     h_new = (tol / r_n) ** (1 / 2) * h_n
     # Controlling the size of the steps
     h_new = min(h_new, omega_max * h_n)
@@ -156,6 +158,10 @@ print('Starting BDFL4_2')
 h4,t_4,bdflike4 = full_lmm_solver(rt.alpha_bdfl4,rt.beta_bdfl4,f,jac)
 print('Starting BDFL5_2')
 h5,t_5,bdflike5 = full_lmm_solver(rt.alpha_bdfl5,rt.beta_bdfl5,f,jac)
+print('# of steps of BDF2: ', len(bdf2))
+print('# of steps of BDFL3_2: ', len(bdflike3))
+print('# of steps of BDFL4_2: ', len(bdflike4))
+print('# of steps of BDFL5_2: ', len(bdflike5))
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 sol = [bdf2,bdflike3,bdflike4,bdflike5]
 t=[t_2,t_3,t_4,t_5]
@@ -164,6 +170,27 @@ ref = solve_ivp(f, [t_2[0], t_2[-1]], y0, method='Radau', jac=jac, rtol=1e-10, a
 ref_vals = [] # interpolated solution at t
 for i in t:
     ref_vals.append(ref.sol(i))
+from collections import defaultdict
+
+lines = defaultdict(lambda: [[], []])
+
+label_set = ["bdf2", "bdflike3", "bdflike4", "bdflike5"]
+
+for label, time, error in r_n_set:
+    lines[label_set[label - 2]][0].append(time)
+    lines[label_set[label - 2]][1].append(error)
+
+plt.figure()
+
+for label, (times, errors) in lines.items():
+    plt.semilogy(times, errors, label=label)
+
+plt.legend()
+plt.ylabel('|Error Estimate|')
+plt.xlabel('t')
+plt.grid()
+plt.show()
+
 plt.ion()
 plt.figure()
 line1 = blc.line

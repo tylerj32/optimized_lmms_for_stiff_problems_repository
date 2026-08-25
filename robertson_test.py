@@ -178,33 +178,40 @@ if __name__ == "__main__":
     plt.grid()
     plt.show()
     # Error plot
-    fig, axs = plt.subplots(3, 1, sharex=True)  # 3 rows, 1 column
+    fig, axs = plt.subplots()
     line = ['-','--',':','-.',(0, (3, 1,1,1)),(0,(1,5)),(0,(1,1)),(5,(10,3)),(0,(5,10)),(0,(5,5))]
     for i in range(len(sol)):
-        y1 = sol[i,:-1,0]
-        y2 = sol[i,:-1,1]
-        y3 = sol[i,:-1,2]
-        # label = f'BDF{i+2}' if i <= 1 else f'BDFL{i+1}'
-        if i<=1:
+        y1 = sol[i, :-1, 0]
+        y2 = sol[i, :-1, 1]
+        y3 = sol[i, :-1, 2]
+
+        # Error in each component
+        e1 = y1 - y1_exact
+        e2 = y2 - y2_exact
+        e3 = y3 - y3_exact
+
+        # Euclidean norm of the error
+        error_norm = np.sqrt(e1 ** 2 + e2 ** 2 + e3 ** 2)
+
+        if i <= 1:
             label = f'BDF{i + 2}'
         else:
-            label = f'BDFL${i+1}_2$'
-        axs[0].loglog(t_1, np.abs(y1-y1_exact), color=default_colors[i],linestyle=line[i], label=label)
-        axs[1].loglog(t_1, np.abs(y2-y2_exact), color=default_colors[i], linestyle=line[i])
-        axs[2].loglog(t_1, np.abs(y3-y3_exact), color=default_colors[i], linestyle=line[i])
-    # Labels for each subplot
-    axs[0].set_ylabel(r'$|y_1 - y_{1\text{(Exact)}}|$')
-    axs[1].set_ylabel(r'$|y_2 - y_{2\text{(Exact)}}|$')
-    axs[2].set_ylabel(r'$|y_3 - y_{3\text{(Exact)}}|$')
-    axs[2].set_xlabel('t')
-    axs[0].set_xlim(t_1[0], t_1[-1])
-    axs[1].set_xlim(t_1[0], t_1[-1])
-    axs[2].set_xlim(t_1[0], t_1[-1])
+            label = f'BDFL${i + 1}_2$'
 
-    # Only one legend (usually top plot)
-    axs[0].legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    axs[0].grid()
-    axs[1].grid()
+        axs.loglog(
+            t_1,
+            error_norm,
+            color=default_colors[i],
+            linestyle=line[i],
+            label=label
+        )
+
+    axs.set_ylabel(r'$\|\mathbf{y}-\mathbf{y}_{\mathrm{Exact}}\|_2$')
+    axs.set_xlabel('t')
+    axs.set_xlim(t_1[0], t_1[-1])
+
+    axs.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    axs.grid()
+
     plt.tight_layout()
-    plt.grid()
     plt.show()
