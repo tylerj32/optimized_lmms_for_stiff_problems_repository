@@ -1,0 +1,464 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 15.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[     13755,        456]
+NotebookOptionsPosition[     11530,        408]
+NotebookOutlinePosition[     11932,        424]
+CellTagsIndexPosition[     11889,        421]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["This Mathematica notebook is just to check Claude\[CloseCurlyQuote]s \
+work", "Subsection",
+ CellChangeTimes->{{3.9979964265583096`*^9, 
+  3.9979964455047264`*^9}},ExpressionUUID->"1c9226ee-40da-154c-b5bf-\
+fba991d6761e"],
+
+Cell[TextData[{
+ "First, Claude rewrote ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SubscriptBox["A", "n"], ",", " ", 
+    SubscriptBox["B", "n"], ",", " ", 
+    RowBox[{"and", " ", 
+     SubscriptBox["C", "n"]}]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "c6804f4c-fa39-5d49-89f4-63bc8ae33ea3"],
+ " from ratios ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[Omega]", "n"], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "d11235e9-c5af-c342-bea9-89d6c0d9df0a"],
+ " to step sizes ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["h", "n"], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "53693fe2-0e5f-3d46-94f0-2655d6b366ae"]
+}], "Subsubsection",
+ CellChangeTimes->{{3.997996455559643*^9, 
+  3.9979965071141186`*^9}},ExpressionUUID->"92347667-0d4c-fd4c-9e09-\
+8fba18f6223b"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[Cell[BoxData[
+ FormBox[
+  SubscriptBox["A", "n"], TraditionalForm]],
+ FormatType->
+  TraditionalForm,ExpressionUUID->"b599c2e7-b10d-0345-8eee-533a2094795e"]], \
+"Subsubsection",
+ CellChangeTimes->{{3.9979965149645615`*^9, 
+  3.997996516481241*^9}},ExpressionUUID->"07cc6722-5014-f84b-90ff-\
+700bc429f37a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      SubscriptBox["\[Omega]", "n"], "+", "1"}], ")"}], 
+    FractionBox[
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{
+        SubscriptBox["\[Omega]", 
+         RowBox[{"n", "-", "1"}]], 
+        RowBox[{"(", 
+         RowBox[{
+          SubscriptBox["\[Omega]", "n"], "+", "1"}], ")"}]}], "+", "1"}], 
+      ")"}], 
+     RowBox[{
+      SubscriptBox["\[Omega]", 
+       RowBox[{"n", "-", "1"}]], "+", "1"}]]}], "/.", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      SubscriptBox["\[Omega]", "n"], "->", 
+      FractionBox[
+       SubscriptBox["h", "n"], 
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "1"}]]]}], ",", 
+     RowBox[{
+      SubscriptBox["\[Omega]", 
+       RowBox[{"n", "-", "1"}]], "->", 
+      FractionBox[
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "1"}]], 
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "2"}]]]}]}], "}"}]}], "//", "Simplify"}]], "Input",
+ CellChangeTimes->{{3.9979963026679974`*^9, 3.9979963704697285`*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"c410c617-fc4d-5643-8442-10124f3a35cb"],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["h", 
+      RowBox[{
+       RowBox[{"-", "1"}], "+", "n"}]], "+", 
+     SubscriptBox["h", "n"]}], ")"}], " ", 
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["h", 
+      RowBox[{
+       RowBox[{"-", "2"}], "+", "n"}]], "+", 
+     SubscriptBox["h", 
+      RowBox[{
+       RowBox[{"-", "1"}], "+", "n"}]], "+", 
+     SubscriptBox["h", "n"]}], ")"}]}], 
+  RowBox[{
+   SubscriptBox["h", 
+    RowBox[{
+     RowBox[{"-", "1"}], "+", "n"}]], " ", 
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["h", 
+      RowBox[{
+       RowBox[{"-", "2"}], "+", "n"}]], "+", 
+     SubscriptBox["h", 
+      RowBox[{
+       RowBox[{"-", "1"}], "+", "n"}]]}], ")"}]}]]], "Output",
+ CellChangeTimes->{3.9979963713127155`*^9},
+ CellLabel->"Out[1]=",ExpressionUUID->"205a326d-ba31-9045-b152-d95421cafb78"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[Cell[BoxData[
+ FormBox[
+  SubscriptBox["B", "n"], TraditionalForm]],
+ FormatType->
+  TraditionalForm,ExpressionUUID->"6f101479-81cc-0d4e-9ac1-73f1db35edc1"]], \
+"Subsubsection",
+ CellChangeTimes->{{3.997996519337206*^9, 
+  3.9979965285688725`*^9}},ExpressionUUID->"c92f3996-977d-574c-a041-\
+b0c735c6080f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"-", 
+     SubscriptBox["\[Omega]", "n"]}], 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{
+       SubscriptBox["\[Omega]", 
+        RowBox[{"n", "-", "1"}]], 
+       RowBox[{"(", 
+        RowBox[{
+         SubscriptBox["\[Omega]", "n"], "+", "1"}], ")"}]}], "+", "1"}], 
+     ")"}]}], "/.", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      SubscriptBox["\[Omega]", "n"], "->", 
+      FractionBox[
+       SubscriptBox["h", "n"], 
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "1"}]]]}], ",", 
+     RowBox[{
+      SubscriptBox["\[Omega]", 
+       RowBox[{"n", "-", "1"}]], "->", 
+      FractionBox[
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "1"}]], 
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "2"}]]]}]}], "}"}]}], "//", "Simplify"}]], "Input",
+ CellChangeTimes->{{3.99799653272097*^9, 3.9979965858510056`*^9}},
+ CellLabel->"In[2]:=",ExpressionUUID->"15daceda-e9c9-9c4a-be2e-e79a02513864"],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  FractionBox[
+   RowBox[{
+    SubscriptBox["h", "n"], " ", 
+    RowBox[{"(", 
+     RowBox[{
+      SubscriptBox["h", 
+       RowBox[{
+        RowBox[{"-", "2"}], "+", "n"}]], "+", 
+      SubscriptBox["h", 
+       RowBox[{
+        RowBox[{"-", "1"}], "+", "n"}]], "+", 
+      SubscriptBox["h", "n"]}], ")"}]}], 
+   RowBox[{
+    SubscriptBox["h", 
+     RowBox[{
+      RowBox[{"-", "2"}], "+", "n"}]], " ", 
+    SubscriptBox["h", 
+     RowBox[{
+      RowBox[{"-", "1"}], "+", "n"}]]}]]}]], "Output",
+ CellChangeTimes->{3.9979965871188984`*^9},
+ CellLabel->"Out[2]=",ExpressionUUID->"784cece1-41ab-ee4c-a584-33ad10544163"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[Cell[BoxData[
+ FormBox[
+  SubscriptBox["D", "n"], TraditionalForm]],
+ FormatType->
+  TraditionalForm,ExpressionUUID->"aee708ac-8383-3c48-b1d4-6d8feae779c3"]], \
+"Subsubsection",
+ CellChangeTimes->{{3.9979965694828777`*^9, 
+  3.997996579718916*^9}},ExpressionUUID->"92ea3855-03f8-c649-bbb6-\
+6e54b1486ced"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    SubscriptBox["\[Omega]", "n"], 
+    RowBox[{"(", 
+     RowBox[{
+      SubscriptBox["\[Omega]", "n"], "+", "1"}], ")"}], 
+    FractionBox[
+     SubsuperscriptBox["\[Omega]", 
+      RowBox[{"n", "-", "1"}], "2"], 
+     RowBox[{
+      SubscriptBox["\[Omega]", 
+       RowBox[{"n", "-", "1"}]], "+", "1"}]]}], "/.", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      SubscriptBox["\[Omega]", "n"], "->", 
+      FractionBox[
+       SubscriptBox["h", "n"], 
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "1"}]]]}], ",", 
+     RowBox[{
+      SubscriptBox["\[Omega]", 
+       RowBox[{"n", "-", "1"}]], "->", 
+      FractionBox[
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "1"}]], 
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "2"}]]]}]}], "}"}]}], "//", "Simplify"}]], "Input",
+ CellChangeTimes->{{3.9979968881983128`*^9, 3.9979969265497093`*^9}},
+ CellLabel->"In[3]:=",ExpressionUUID->"f972617a-9946-1e40-9ebd-333d3a260710"],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{
+   SubscriptBox["h", "n"], " ", 
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["h", 
+      RowBox[{
+       RowBox[{"-", "1"}], "+", "n"}]], "+", 
+     SubscriptBox["h", "n"]}], ")"}]}], 
+  RowBox[{
+   SubscriptBox["h", 
+    RowBox[{
+     RowBox[{"-", "2"}], "+", "n"}]], " ", 
+   RowBox[{"(", 
+    RowBox[{
+     SubscriptBox["h", 
+      RowBox[{
+       RowBox[{"-", "2"}], "+", "n"}]], "+", 
+     SubscriptBox["h", 
+      RowBox[{
+       RowBox[{"-", "1"}], "+", "n"}]]}], ")"}]}]]], "Output",
+ CellChangeTimes->{3.997996927860531*^9},
+ CellLabel->"Out[3]=",ExpressionUUID->"cf42ca16-e316-f944-b8c6-01e41b9abe56"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[Cell[BoxData[
+ FormBox[
+  SubscriptBox["c", 
+   RowBox[{"z", ",", "n"}]], TraditionalForm]],
+ FormatType->
+  TraditionalForm,ExpressionUUID->"059086c3-6de1-1247-ad2b-cf20f4d71195"]], \
+"Subsubsection",
+ CellChangeTimes->{{3.9979969794158325`*^9, 
+  3.9979969889399967`*^9}},ExpressionUUID->"70b3b942-79d9-164b-94f0-\
+3c2a2c732f89"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    FractionBox[
+     RowBox[{"-", "1"}], "6"], 
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      FractionBox["1", 
+       SubscriptBox["\[Omega]", "n"]]}], ")"}], 
+    RowBox[{"(", 
+     RowBox[{"1", "+", 
+      FractionBox["1", 
+       SubscriptBox["\[Omega]", "n"]], "+", 
+      FractionBox["1", 
+       RowBox[{
+        SubscriptBox["\[Omega]", "n"], 
+        SubscriptBox["\[Omega]", 
+         RowBox[{"n", "-", "1"}]]}]]}], ")"}]}], "/.", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      SubscriptBox["\[Omega]", "n"], "->", 
+      FractionBox[
+       SubscriptBox["h", "n"], 
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "1"}]]]}], ",", 
+     RowBox[{
+      SubscriptBox["\[Omega]", 
+       RowBox[{"n", "-", "1"}]], "->", 
+      FractionBox[
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "1"}]], 
+       SubscriptBox["h", 
+        RowBox[{"n", "-", "2"}]]]}]}], "}"}]}], "//", "Simplify"}]], "Input",
+ CellChangeTimes->{{3.997996967689993*^9, 3.9979970666363525`*^9}},
+ CellLabel->"In[5]:=",ExpressionUUID->"a6f67e0f-1750-2641-8402-53d8aba60008"],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  FractionBox[
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      SubscriptBox["h", 
+       RowBox[{
+        RowBox[{"-", "1"}], "+", "n"}]], "+", 
+      SubscriptBox["h", "n"]}], ")"}], " ", 
+    RowBox[{"(", 
+     RowBox[{
+      SubscriptBox["h", 
+       RowBox[{
+        RowBox[{"-", "2"}], "+", "n"}]], "+", 
+      SubscriptBox["h", 
+       RowBox[{
+        RowBox[{"-", "1"}], "+", "n"}]], "+", 
+      SubscriptBox["h", "n"]}], ")"}]}], 
+   RowBox[{"6", " ", 
+    SubsuperscriptBox["h", "n", "2"]}]]}]], "Output",
+ CellChangeTimes->{{3.997997061147375*^9, 3.9979970674313755`*^9}},
+ CellLabel->"Out[5]=",ExpressionUUID->"323890f8-3655-d249-8aec-55658d03c9eb"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[TextData[{
+ "It also changed ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["c", "j"], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "08d79887-ef71-4e4b-a2fa-48408a4dd1e4"],
+ " to tau, perhaps to avoid naming confusion, as now a lot of variables in \
+the script are now ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["c", "something"], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "83cfa1f7-f697-ce4f-9a1d-23e5a31716a0"]
+}], "Subsubsection",
+ CellChangeTimes->{{3.9979973964713345`*^9, 
+  3.997997442067686*^9}},ExpressionUUID->"ea66840e-6310-b143-b44f-\
+91c656b75610"],
+
+Cell["\<\
+Claude also added another else statement for the BDF2 method, explained in \
+lines 152-153\
+\>", "Subsubsection",
+ CellChangeTimes->{{3.9979979863528137`*^9, 3.997997998466463*^9}, {
+  3.9979988551746483`*^9, 
+  3.997998883797756*^9}},ExpressionUUID->"d79f73a8-cbbe-3f4d-bddd-\
+b4d649e11066"],
+
+Cell["\<\
+Lines 82-86 show that the implicit Euler is still used for the TR-BDF2 \
+method, which looks fine to me\
+\>", "Subsubsection",
+ CellChangeTimes->{{3.9979989175432816`*^9, 
+  3.997998970728882*^9}},ExpressionUUID->"7251196d-246a-8340-a2cd-\
+cb996d726d8d"]
+}, Open  ]]
+},
+WindowSize->{574.8, 573.6},
+WindowMargins->{{-4.8, Automatic}, {Automatic, 0}},
+FrontEndVersion->"15.0 for Microsoft Windows (64-bit) (July 2, 2026)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"7dcef9fe-4b7a-f643-a2ca-dbb97a7e645e"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 227, 4, 53, "Subsection",ExpressionUUID->"1c9226ee-40da-154c-b5bf-fba991d6761e"],
+Cell[806, 28, 842, 26, 68, "Subsubsection",ExpressionUUID->"92347667-0d4c-fd4c-9e09-8fba18f6223b"],
+Cell[CellGroupData[{
+Cell[1673, 58, 319, 8, 35, "Subsubsection",ExpressionUUID->"07cc6722-5014-f84b-90ff-700bc429f37a"],
+Cell[CellGroupData[{
+Cell[2017, 70, 1128, 37, 45, "Input",ExpressionUUID->"c410c617-fc4d-5643-8442-10124f3a35cb"],
+Cell[3148, 109, 867, 31, 49, "Output",ExpressionUUID->"205a326d-ba31-9045-b152-d95421cafb78"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4064, 146, 319, 8, 43, "Subsubsection",ExpressionUUID->"c92f3996-977d-574c-a041-b0c735c6080f"],
+Cell[CellGroupData[{
+Cell[4408, 158, 974, 32, 45, "Input",ExpressionUUID->"15daceda-e9c9-9c4a-be2e-e79a02513864"],
+Cell[5385, 192, 647, 22, 48, "Output",ExpressionUUID->"784cece1-41ab-ee4c-a584-33ad10544163"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6081, 220, 319, 8, 43, "Subsubsection",ExpressionUUID->"92ea3855-03f8-c649-bbb6-6e54b1486ced"],
+Cell[CellGroupData[{
+Cell[6425, 232, 989, 31, 48, "Input",ExpressionUUID->"f972617a-9946-1e40-9ebd-333d3a260710"],
+Cell[7417, 265, 654, 23, 49, "Output",ExpressionUUID->"cf42ca16-e316-f944-b8c6-01e41b9abe56"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8120, 294, 345, 9, 44, "Subsubsection",ExpressionUUID->"70b3b942-79d9-164b-94f0-3c2a2c732f89"],
+Cell[CellGroupData[{
+Cell[8490, 307, 1115, 36, 45, "Input",ExpressionUUID->"a6f67e0f-1750-2641-8402-53d8aba60008"],
+Cell[9608, 345, 692, 22, 50, "Output",ExpressionUUID->"323890f8-3655-d249-8aec-55658d03c9eb"]
+}, Open  ]]
+}, Open  ]],
+Cell[10327, 371, 615, 17, 94, "Subsubsection",ExpressionUUID->"ea66840e-6310-b143-b44f-91c656b75610"],
+Cell[10945, 390, 302, 7, 60, "Subsubsection",ExpressionUUID->"d79f73a8-cbbe-3f4d-bddd-b4d649e11066"],
+Cell[11250, 399, 264, 6, 60, "Subsubsection",ExpressionUUID->"7251196d-246a-8340-a2cd-cb996d726d8d"]
+}, Open  ]]
+}
+]
+*)
+

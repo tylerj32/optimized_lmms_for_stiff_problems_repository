@@ -16,13 +16,13 @@ y0 = [2.0, 0.0]
 h1 = .001
 # Step size limits (for now)
 h_min = 1e-5
-h_max = 100.0
+h_max = 2.0
 omega_max = 1.5
 omega_min = 0.1
 # 2000
 t_final = 2000
 # Tolerance
-tol = 1e-3
+tol = 1e-5
 # Defining the differential equation (and its Jacobian)
 mu = 500
 def f(t, u):
@@ -46,13 +46,6 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
     s = len(alpha(_h_dummy, -1)) - 1
     h_n = h[-1]
     t_new = t[-1] + h_n
-    # Evaluating Implicit Euler
-
-    def ie_residual(y):
-        return y - lmm_y[-1] - h_n * f(t_new, y)
-
-    jac_ie = lambda y: np.eye(m) - h_n * jac(t_new, y)
-    y_new = opt.fsolve(ie_residual, lmm_y[-1], fprime=jac_ie)
     # For the first k-1 steps we use TR-BDF2
     if len(t)<s:
         # Jacobian functions for TR-BDF2
@@ -86,9 +79,14 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
         result, info, ier, mesg = opt.fsolve(trbdf2, u_star, fprime=jac_bdf2, full_output=True)
         if ier != 1:
             print(f"TR-BDF2 stage 2 failed at startup step {i}: {mesg}")
-        # Embedded error estimate
+        # Embedded error estimate: implicit Euler is only needed for these startup steps
+        def ie_residual(y):
+            return y - lmm_y[-1] - h_n * f(t_new, y)
+        jac_ie = lambda y: np.eye(m) - h_n * jac(t_new, y)
+        y_new = opt.fsolve(ie_residual, lmm_y[-1], fprime=jac_ie)
         r_n = np.linalg.norm(result - y_new)
         r_n = max(r_n, 1e-14) # The max prevents division by zero
+        accept = True # startup steps are always kept
     # Once s<len(t) then we start adding the rest of the steps via the LMM
     else:
 
@@ -114,29 +112,76 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
         residual = np.linalg.norm(info['fvec'])
         if ier != 1 and residual > 1e-10:
             print(f"fsolve failed at t={t[-1]:.4f}: ier={ier}, |fvec|={residual:.2e}, msg={mesg}")
-        # Scale by (1 + omega) to account for variable
-        # omega_n = h_n / h[-2]
-        r_n = np.linalg.norm(result-y_new)#/(1+omega_n)
-        r_n = max(r_n, 1e-14) # The max prevents division by zero
-        r_n_set.append((s, t_new, r_n))
-    h_new = (tol / r_n) ** (1 / 2) * h_n
+        # Local error estimate: quadratic extrapolation predictor + Milne-type scaling.
+        # Both the BDFL solution and the predictor carry an O(h_n^3) local error, so their
+        # difference measures the same y''' term that drives the BDFL local error.
+        # Step sizes follow the same convention the alpha/beta coefficient functions use,
+        # i.e. h[-1] = h_n (current step), h[-2] = h_{n-1}, h[-3] = h_{n-2}.
+        if len(lmm_y) >= 3 and len(h) >= 3:
+            h_nm1 = h[-2]
+            h_nm2 = h[-3]
+            # Quadratic through (t_{n-2},y_{n-2}), (t_{n-1},y_{n-1}), (t_n,y_n) evaluated at t_{n+1}
+            A_n = ((h_n + h_nm1) * (h_n + h_nm1 + h_nm2)) / (h_nm1 * (h_nm1 + h_nm2))
+            B_n = -(h_n * (h_n + h_nm1 + h_nm2)) / (h_nm1 * h_nm2)
+            D_n = (h_n * (h_n + h_nm1)) / (h_nm2 * (h_nm1 + h_nm2))
+            z_np1 = A_n * lmm_y[-1] + B_n * lmm_y[-2] + D_n * lmm_y[-3]
+            # Interpolation remainder: z_{n+1} - y(t_{n+1}) = c_z * h_n^3 * y'''(t_n) + O(h_n^4)
+            c_z = -(h_n + h_nm1) * (h_n + h_nm1 + h_nm2) / (6 * h_n**2)
+            # Residual coefficient of the variable-step BDFL method,
+            # C_3 = sum_j alpha_j c_j^3/6 - sum_j beta_j c_j^2/2, where c_j = (t_j - t_n)/h_n
+            # are the stencil nodes scaled by the current step (c = 1 at t_{n+1}, 0 at t_n).
+            tau = np.zeros(s + 1) # Here we change c_j to tau to separate it from similar names
+            tau[s] = 1.0
+            tau[s-1] = 0.0
+            back = 0.0
+            for j in range(1, s):
+                back += h[-1-j]
+                tau[s-1-j] = -back / h_n
+            C_3 = np.dot(alpha_n, tau**3) / 6.0 - np.dot(beta_n, tau**2) / 2.0
+            # y^BDFL_{n+1} - y(t_{n+1}) = c_y * h_n^3 * y'''(t_n) + O(h_n^4)
+            c_y = -C_3
+            # Milne scaling. If the two error constants nearly coincide the estimator is
+            # ill-conditioned, so fall back to the conservative unscaled difference.
+            denom = c_y - c_z
+            K_n = c_y / denom if abs(denom) > 1e-8 else 1.0
+            E_n = abs(K_n) * np.linalg.norm(result - z_np1)
+            E_n = max(E_n, 1e-14) # The max prevents division by zero
+            # Error per unit step, so the controller keeps the exponent 1/q with q = 2
+            r_n = E_n / h_n
+            # Reject a step whose error per unit step overshoots the tolerance. The
+            # slack factor keeps the rejection rate down without loosening accuracy.
+            accept = r_n <= 2.0 * tol
+            r_n_set.append((s, t_new, E_n))
+        else:
+            # Fewer than three accepted values: the quadratic predictor is unavailable,
+            # so hold the current step size for this one startup step.
+            r_n = tol
+            accept = True
+    h_new = 0.9 * (tol / r_n) ** (1 / 2) * h_n
     # Controlling the size of the steps
     h_new = min(h_new, omega_max * h_n)
     h_new = max(h_new, omega_min * h_n)
     h_new = max(h_min, min(h_max, h_new))
-    return result,float(h_new)
+    return result,float(h_new),accept
 def full_lmm_solver(alpha,beta,f,jac):
     lmm_y = np.array([y0], dtype=float)
     t = [0.0] # t starts at 0s and 0+h_n seconds
     h=[h1] # BDFL3 and 4 need more than one h_n
+    n_rejected = 0
     quarter_printed = False
     half_printed = False
     threequarter_printed = False
     while t[-1]<=t_final:
-        lmm_y_new,h_new = LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac)
+        lmm_y_new,h_new,accept = LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac)
+        if (not accept) and h[-1] > h_min:
+            # Redo this step with the smaller proposal instead of keeping a bad value
+            h[-1] = h_new
+            n_rejected += 1
+            continue
         lmm_y = np.append(lmm_y, [lmm_y_new], axis=0)
+        # The step just taken was h[-1], so advance t by that before queueing h_new
+        t.append(t[-1]+h[-1])
         h.append(h_new)
-        t.append(t[-1]+h_new)
         current_t = t[-1]
         if (not quarter_printed) and current_t >= 0.25 * t_final:
             print("The solver is 25% complete...")
@@ -147,7 +192,7 @@ def full_lmm_solver(alpha,beta,f,jac):
         if (not threequarter_printed) and current_t >= 0.75 * t_final:
             print("The solver is 75% complete...")
             threequarter_printed = True
-    print('Finished! :)')
+    print(f'Finished! :) rejected steps: {n_rejected}')
     return h,t,lmm_y
 # BDFL methods
 print('Starting BDF2')
@@ -166,7 +211,11 @@ default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 sol = [bdf2,bdflike3,bdflike4,bdflike5]
 t=[t_2,t_3,t_4,t_5]
 h_set = [h2,h3,h4,h5]
-ref = solve_ivp(f, [t_2[0], t_2[-1]], y0, method='Radau', jac=jac, rtol=1e-10, atol=1e-12, dense_output=True)
+# Integrate the reference past the last point of every method so ref.sol never extrapolates
+t_ref_end = max(t_i[-1] for t_i in t)
+ref = solve_ivp(f, [t_2[0], t_ref_end], y0, method='Radau', jac=jac, rtol=1e-10, atol=1e-12, dense_output=True)
+# The BDFL time points are far too sparse to draw the reference curve itself
+t_dense = np.linspace(t_2[0], t_2[-1], 20001)
 ref_vals = [] # interpolated solution at t
 for i in t:
     ref_vals.append(ref.sol(i))
@@ -195,7 +244,7 @@ plt.ion()
 plt.figure()
 line1 = blc.line
 method_handles = []
-plt.plot(t_2,ref_vals[0][0], color='black', lw=2, label='Exact solution')
+plt.plot(t_dense,ref.sol(t_dense)[0], color='black', lw=2, label='Exact solution')
 method_handles.append(
         Line2D([0], [0], color='black', lw=2, label='Exact solution')
     )
