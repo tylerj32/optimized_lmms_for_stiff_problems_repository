@@ -39,3 +39,5 @@ The GitHub repository for the paper Optimized Linear Multistep Methods for Stiff
 `wolframscript -file variable_step_conditions.nb`
 # Deriving the variable step BDFL methods via the polynomial method and by the order conditions (also checking for 0-stability)
 `wolframscript -file variable_step_coeffs.nb`
+# Checking Claude's output and code editing in van_der_pol_variable_step.py
+`wolframscript -file claude_check.nb`
