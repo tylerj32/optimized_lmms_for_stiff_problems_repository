@@ -1,5 +1,5 @@
 # optimized_lmms_for_stiff_problems_repository
-The GitHub repository for the paper Optimized linear multistep methods for stiff problems
+The GitHub repository for the paper Optimized Linear Multistep Methods for Stiff Problems
 ## Reproducing figures
 # You will need python installed with libraries numpy, matplotlib and scipy
 # BDFL and L(\kappa)-stable plots. For this file, to get a comparison of the BDFL methods, set s=0 on line 28. To get a comparison of the L(\kappa)-stable methods, set s=1 on line 28
