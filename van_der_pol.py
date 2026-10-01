@@ -24,7 +24,7 @@ def jac(t, u):
     y1, y2 = u
     return np.array([
         [0.0,  1.0],
-        [2*mu*y2*y1-1.0,   mu*(1-y1**2)]
+        [-2*mu*y2*y1-1.0,   mu*(1-y1**2)]
     ])
 # BDFL methods
 bdf2 = bf.LMM_solver2(t_2,[1/3,-4/3,1],[0,0,2/3],t0,f,jac)

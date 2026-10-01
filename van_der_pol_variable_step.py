@@ -15,8 +15,7 @@ y0 = [2.0, 0.0]
 # Initial step size
 h1 = .001
 # Step size limits (for now)
-h_min = 1e-5
-h_max = 2.0
+h_floor = 1e-14
 omega_max = 1.5
 omega_min = 0.1
 # 2000
@@ -35,7 +34,7 @@ def jac(t, u):
     y1, y2 = u
     return np.array([
         [0.0,  1.0],
-        [2*mu*y2*y1-1.0,   mu*(1-y1**2)]
+        [-2*mu*y2*y1-1.0,   mu*(1-y1**2)]
     ])
 # Adding the specialized solver for this method
 r_n_set = []
@@ -100,18 +99,18 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
             full_lmm += _alpha[s] * u_new
             for j in range(s):
                 full_lmm -= h_n * _beta[j] * f(t[-s+j], lmm_y[-s+j])
-            full_lmm -= h_n * _beta[s] * f(t[-1], u_new)
+            full_lmm -= h_n * _beta[s] * f(t_new, u_new)
             return full_lmm
 
         jac_lmm = lambda u, _a=alpha_n, _b=beta_n: \
-            _a[s] * np.eye(m) - h_n * _b[s] * jac(t[-1], u)
+            _a[s] * np.eye(m) - h_n * _b[s] * jac(t_new, u)
 
         # Extrapolated guess
         guess = lmm_y[-1] + h_n / h[-2] * (lmm_y[-1] - lmm_y[-2])
-        result, info, ier, mesg = opt.fsolve(lmm, guess, fprime=jac_lmm, full_output=True)
+        result, info, ier, mesg = opt.fsolve(lmm, guess, fprime=jac_lmm, full_output=True, xtol=1e-11)
         residual = np.linalg.norm(info['fvec'])
         if ier != 1 and residual > 1e-10:
-            print(f"fsolve failed at t={t[-1]:.4f}: ier={ier}, |fvec|={residual:.2e}, msg={mesg}")
+            return None, 0.5*h_n, False
         # Local error estimate: quadratic extrapolation predictor + Milne-type scaling.
         # Both the BDFL solution and the predictor carry an O(h_n^3) local error, so their
         # difference measures the same y''' term that drives the BDFL local error.
@@ -144,25 +143,31 @@ def LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac):
             # ill-conditioned, so fall back to the conservative unscaled difference.
             denom = c_y - c_z
             K_n = c_y / denom if abs(denom) > 1e-8 else 1.0
+
+            roundoff = np.finfo(float).eps * max(1.0, np.linalg.norm(result), np.linalg.norm(z_np1))
             E_n = abs(K_n) * np.linalg.norm(result - z_np1)
-            E_n = max(E_n, 1e-14) # The max prevents division by zero
-            # Error per unit step, so the controller keeps the exponent 1/q with q = 2
-            r_n = E_n / h_n
-            # Reject a step whose error per unit step overshoots the tolerance. The
-            # slack factor keeps the rejection rate down without loosening accuracy.
-            accept = r_n <= 2.0 * tol
+
+            if E_n <= roundoff: # estimated error is essentially zero
+                r_n = 0.0
+                accept = True
+                fac = omega_max
+            else:
+                r_n = E_n / h_n
+                accept = r_n <= tol
+                fac = 0.9 * (tol / r_n)**0.5
+
+            fac = min(omega_max, max(omega_min, fac))
+            h_new = fac * h_n
+
             r_n_set.append((s, t_new, E_n))
         else:
             # Fewer than three accepted values: the quadratic predictor is unavailable,
             # so hold the current step size for this one startup step.
             r_n = tol
             accept = True
-    h_new = 0.9 * (tol / r_n) ** (1 / 2) * h_n
-    # Controlling the size of the steps
-    h_new = min(h_new, omega_max * h_n)
-    h_new = max(h_new, omega_min * h_n)
-    h_new = max(h_min, min(h_max, h_new))
     return result,float(h_new),accept
+
+
 def full_lmm_solver(alpha,beta,f,jac):
     lmm_y = np.array([y0], dtype=float)
     t = [0.0] # t starts at 0s and 0+h_n seconds
@@ -173,11 +178,19 @@ def full_lmm_solver(alpha,beta,f,jac):
     threequarter_printed = False
     while t[-1]<=t_final:
         lmm_y_new,h_new,accept = LMM_step_solver(t,h,alpha,beta,lmm_y,f,jac)
-        if (not accept) and h[-1] > h_min:
-            # Redo this step with the smaller proposal instead of keeping a bad value
-            h[-1] = h_new
+
+        if not accept:
             n_rejected += 1
+
+            if h_new <= h_floor:
+                raise RuntimeError(
+                    f"Step size underflow at t={t[-1]:.16e}: "
+                    f"h={h[-1]:.3e}, proposed h={h_new:.3e}"
+                )
+
+            h[-1] = h_new
             continue
+
         lmm_y = np.append(lmm_y, [lmm_y_new], axis=0)
         # The step just taken was h[-1], so advance t by that before queueing h_new
         t.append(t[-1]+h[-1])
